@@ -68,14 +68,15 @@ button {
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 999;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .modal-box {
