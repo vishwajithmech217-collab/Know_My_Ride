@@ -128,3 +128,10 @@ button {
   padding: 12px;
   border-radius: 10px;
 }
+
+.selected-tag {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2ecc71;
+  font-weight: bold;
+}
