@@ -20,13 +20,19 @@ function toggleAdvanced() {
 }
 
 function getLegHeight() {
-  const manual = Number(document.getElementById("legHeight")?.value);
-  if (manual && manual > 40) return manual;
+  const manualInput = document.getElementById("legHeight");
+  const manual = manualInput ? Number(manualInput.value) : 0;
 
+  // If user entered leg height, ALWAYS use it
+  if (manual && manual > 40) {
+    return manual;
+  }
+
+  // Else estimate from height
   const height = Number(document.getElementById("height").value);
   if (!height || height < 120) return null;
 
-  return height * 0.45; // estimated
+  return height * 0.45;
 }
 
 function avg(v) {
@@ -136,7 +142,7 @@ function addToCompare() {
   closeDetail();
 
   if (compareList.length === 2) {
-    showCompare();
+    document.getElementById("compareBtn").disabled = false;
   }
 }
 
