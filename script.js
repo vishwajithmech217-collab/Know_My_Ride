@@ -64,14 +64,17 @@ function recommend() {
     .sort((a,b) => finalScore(b) - finalScore(a));
 
   list.forEach((v,i) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      ${i===0 ? `<div class="best-tag">⭐ Best for you</div>` : ""}
-      <b>${v.name}</b><br>
-      Score: ${finalScore(v)}/100
-      <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
-    `;
+const isSelected = compareList.find(c => c.name === v.name);
+
+div.innerHTML = `
+  ${index === 0 ? `<div class="best-tag">⭐ Best for You</div>` : ""}
+  <b>${v.name}</b><br>
+  Score: ${score}/100
+
+  ${isSelected ? `<div class="selected-tag">✔ Selected for Compare</div>` : ""}
+
+  <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
+`;
     box.appendChild(div);
   });
 }
