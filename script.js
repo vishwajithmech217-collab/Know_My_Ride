@@ -1,214 +1,107 @@
 console.log("JS loaded");
 
+// VEHICLE DATA
 const vehicles = [
-  {name:"Yamaha MT-15", type:"bike", comfort:85, control:90, posture:80, cityBias:60, seatHeight:810},
-  {name:"Royal Enfield Classic 350", type:"bike", comfort:88, control:75, posture:90, cityBias:55, seatHeight:805},
-  {name:"TVS Ntorq 125", type:"scooter", comfort:80, control:78, posture:82, cityBias:85, seatHeight:770},
-  {name:"Honda Activa 6G", type:"scooter", comfort:78, control:76, posture:80, cityBias:90, seatHeight:692},
-  {name:"Hyundai i20", type:"car", comfort:88, control:85, posture:90, cityBias:55, seatHeight:480},
-  {name:"Kia Seltos", type:"suv", comfort:90, control:82, posture:92, cityBias:50, seatHeight:600}
+  {name:"Yamaha MT-15", type:"bike", comfort:85, control:90, posture:80, cityBias:60},
+  {name:"Royal Enfield Classic 350", type:"bike", comfort:88, control:75, posture:90, cityBias:55},
+  {name:"TVS Ntorq 125", type:"scooter", comfort:80, control:78, posture:82, cityBias:85},
+  {name:"Honda Activa 6G", type:"scooter", comfort:78, control:76, posture:80, cityBias:90},
+  {name:"Hyundai i20", type:"car", comfort:88, control:85, posture:90, cityBias:55},
+  {name:"Kia Seltos", type:"suv", comfort:90, control:82, posture:92, cityBias:50}
 ];
 
-let selectedVehicle = null;
-let compareList = [];
+let selected = null;
+let compare = [];
 
-// ---------- HELPERS ----------
-
-function toggleAdvanced() {
-  const box = document.getElementById("advancedSection");
-  box.style.display = box.style.display === "none" ? "block" : "none";
-}
-
-function getLegHeight() {
-  const manualInput = document.getElementById("legHeight");
-  const manual = manualInput ? Number(manualInput.value) : 0;
-
-  // If user entered leg height, ALWAYS use it
-  if (manual && manual > 40) {
-    return manual;
-  }
-
-  // Else estimate from height
-  const height = Number(document.getElementById("height").value);
-  if (!height || height < 120) return null;
-
-  return height * 0.45;
-}
-
-function avg(v) {
+// SCORE
+function avg(v){
   return Math.round((v.comfort + v.control + v.posture + v.cityBias) / 4);
 }
 
-function finalScore(v) {
-  let score = avg(v);
-  const leg = getLegHeight();
-  if (!leg) return score;
-
-  const reach = leg * 10 * 0.9;
-  if (v.seatHeight > reach + 40) score -= 6;
-  else if (v.seatHeight > reach) score -= 3;
-  else score += 2;
-
-  return Math.max(0, Math.min(score, 100));
-}
-
-// ---------- MAIN ----------
-
-function recommend() {
+// MAIN LOGIC
+function recommend(){
   const type = document.getElementById("type").value;
-  const box = document.getElementById("results");
-  box.innerHTML = "";
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+  compare = [];
+  document.getElementById("compareBtn").classList.add("hidden");
 
-  const list = vehicles
-    .filter(v => v.type === type)
-    .sort((a,b) => finalScore(b) - finalScore(a));
+  let filtered = vehicles.filter(v => v.type === type);
+  filtered.sort((a,b)=>avg(b)-avg(a));
 
-  list.forEach((v,i) => {
-const isSelected = compareList.find(c => c.name === v.name);
-
-div.innerHTML = `
-  ${index === 0 ? `<div class="best-tag">⭐ Best for You</div>` : ""}
-  <b>${v.name}</b><br>
-  Score: ${score}/100
-
-  ${isSelected ? `<div class="selected-tag">✔ Selected for Compare</div>` : ""}
-
-  <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
-`;
-    box.appendChild(div);
+  filtered.forEach((v,i)=>{
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      ${i===0 ? "<div class='best'>⭐ Best for you</div>" : ""}
+      <b>${v.name}</b><br>
+      Score: ${avg(v)}/100<br><br>
+      <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
+    `;
+    results.appendChild(div);
   });
 }
 
-// ---------- DETAILS ----------
-
-function buildWhyFit(v) {
-  return [
-    "Recommendation based on your height and usage",
-    "Overall balance suits your riding profile"
-  ];
-}
-
-function buildWhyNotFit(v) {
-  const warnings = [];
-  const leg = getLegHeight();
-
-  if (leg) {
-    const reach = leg * 10 * 0.9;
-    if (v.seatHeight > reach + 40)
-      warnings.push("Seat height may feel tall when stopping");
-  }
-
-  if (warnings.length === 0)
-    warnings.push("No major drawbacks found");
-
-  return warnings;
-}
-
-function showDetail(v) {
-  selectedVehicle = v;
+// DETAIL VIEW
+function showDetail(v){
+  selected = v;
   document.getElementById("detailModal").classList.remove("hidden");
-
   document.getElementById("dName").innerText = v.name;
-  document.getElementById("dScore").innerText =
-    `Overall Score: ${finalScore(v)}/100`;
+  document.getElementById("dScore").innerText = "Overall Score: " + avg(v) + "/100";
 
-  const fit = document.getElementById("whyFitList");
-  fit.innerHTML = "";
-  buildWhyFit(v).forEach(t => {
-    const li = document.createElement("li");
-    li.innerText = t;
-    fit.appendChild(li);
-  });
-
-  const notFit = document.getElementById("whyNotFitList");
-  notFit.innerHTML = "";
-  buildWhyNotFit(v).forEach(t => {
-    const li = document.createElement("li");
-    li.innerText = t;
-    notFit.appendChild(li);
-  });
+  buildWhy(v);
+  buildWhyNot(v);
 }
 
-function closeDetail() {
+function closeDetail(){
   document.getElementById("detailModal").classList.add("hidden");
 }
 
-// ---------- COMPARE ----------
+// WHY FITS
+function buildWhy(v){
+  const ul = document.getElementById("whyFit");
+  ul.innerHTML = "";
+  const height = Number(document.getElementById("height").value);
+  const usage = Number(document.getElementById("usage").value);
 
-function addToCompare() {
-  if (!selectedVehicle) return;
+  if(height >= 165 && height <= 180) ul.innerHTML += "<li>Comfortable posture for your height</li>";
+  if(usage > 50) ul.innerHTML += "<li>Good stability for highway rides</li>";
+  else ul.innerHTML += "<li>Easy to use in city traffic</li>";
+}
 
-  const index = compareList.findIndex(
-    v => v.name === selectedVehicle.name
-  );
+// WHY NOT
+function buildWhyNot(v){
+  const ul = document.getElementById("whyNot");
+  ul.innerHTML = "";
+  const usage = Number(document.getElementById("usage").value);
 
-  // If already selected → REMOVE
-  if (index !== -1) {
-    compareList.splice(index, 1);
-  } 
-  // If not selected → ADD (max 2)
-  else {
-    if (compareList.length >= 2) {
-      alert("You can compare only 2 vehicles");
-      return;
-    }
-    compareList.push(selectedVehicle);
+  if(v.type==="scooter" && usage > 70)
+    ul.innerHTML += "<li>Not ideal for long highway rides</li>";
+  else
+    ul.innerHTML += "<li>No major drawbacks</li>";
+}
+
+// COMPARE
+function selectCompare(){
+  if(selected && compare.length < 2 && !compare.includes(selected)){
+    compare.push(selected);
   }
-
   closeDetail();
-  recommend(); // refresh cards
+  if(compare.length === 2){
+    document.getElementById("compareBtn").classList.remove("hidden");
+  }
 }
 
-function showCompare() {
+function openCompare(){
+  const box = document.getElementById("compareBox");
+  box.innerHTML = "";
+  compare.forEach(v=>{
+    box.innerHTML += `<p><b>${v.name}</b> – ${avg(v)}/100</p>`;
+  });
   document.getElementById("compareModal").classList.remove("hidden");
-  renderCompare("c1", compareList[0]);
-  renderCompare("c2", compareList[1]);
 }
 
-function renderCompare(id, v) {
-  document.getElementById(id).innerHTML = `
-    <h3>${v.name}</h3>
-
-    <div class="metric">Comfort</div>
-    <div class="bar"><div class="fill" style="width:${v.comfort}%"></div></div>
-
-    <div class="metric">Control</div>
-    <div class="bar"><div class="fill" style="width:${v.control}%"></div></div>
-
-    <div class="metric">Posture</div>
-    <div class="bar"><div class="fill" style="width:${v.posture}%"></div></div>
-
-    <div class="metric">Usage</div>
-    <div class="bar"><div class="fill" style="width:${v.cityBias}%"></div></div>
-
-    <b>Total Score: ${avg(v)}/100</b>
-  `;
-}
-
-function closeCompare() {
+function closeCompare(){
   document.getElementById("compareModal").classList.add("hidden");
-  compareList = [];
+  compare = [];
 }
-
-// ---------- SLIDER TEXT ----------
-
-document.addEventListener("DOMContentLoaded", () => {
-  const usage = document.getElementById("usage");
-  const usageText = document.getElementById("usageText");
-  const frequency = document.getElementById("frequency");
-  const freqText = document.getElementById("freqText");
-
-  usage.addEventListener("input", () => {
-    usageText.innerText =
-      usage.value < 30 ? "City focused" :
-      usage.value < 60 ? "Balanced usage" :
-      "Highway focused";
-  });
-
-  frequency.addEventListener("input", () => {
-    freqText.innerText =
-      frequency.value < 30 ? "Occasional usage" :
-      frequency.value < 60 ? "Moderate usage" :
-      "Daily usage";
-  });
-});
