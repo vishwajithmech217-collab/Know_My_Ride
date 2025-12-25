@@ -70,7 +70,8 @@
     <h3>Why this may not fit you</h3>
     <ul id="whyNotFitList"></ul>
 
-    <button onclick="addToCompare()">Add to Compare</button>
+<button onclick="addToCompare()">Toggle Compare</button>
+
     <button onclick="closeDetail()">Close</button>
   </div>
 </div>
@@ -78,12 +79,14 @@
 <!-- COMPARE MODAL -->
 <div id="compareModal" class="modal hidden">
   <div class="modal-box wide">
-    <h2>Compare Vehicles</h2>
+    <h2>Vehicle Comparison</h2>
+
     <div class="compare-grid">
-      <div id="c1"></div>
-      <div id="c2"></div>
+      <div id="c1" class="compare-card"></div>
+      <div id="c2" class="compare-card"></div>
     </div>
-    <button onclick="closeCompare()">Close</button>
+
+    <button class="green" onclick="closeCompare()">Close</button>
   </div>
 </div>
 
