@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Know Your Ride</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Know Your Ride</h1>
+
+  <label>Height (cm)</label>
+  <input id="height" type="number" placeholder="170">
+
+  <label>Weight (kg)</label>
+  <input id="weight" type="number" placeholder="70">
+
+  <label>Vehicle Type</label>
+  <select id="type">
+    <option value="bike">Bike</option>
+    <option value="scooter">Scooter</option>
+    <option value="car">Car</option>
+    <option value="suv">SUV</option>
+  </select>
+
+  <label>Usage</label>
+  <div class="slider-labels">
+    <span>City</span><span>Highway</span>
+  </div>
+  <input type="range" id="usage" min="0" max="100" value="50">
+  <p id="usageText" class="slider-text">Balanced usage</p>
+
+  <label>Usage Frequency</label>
+  <div class="slider-labels">
+    <span>Occasional</span><span>Daily</span>
+  </div>
+  <input type="range" id="frequency" min="0" max="100" value="50">
+  <p id="freqText" class="slider-text">Moderate usage</p>
+
+  <button id="recommendBtn" onclick="recommend()">Get Recommendation</button>
+
+  <div id="results"></div>
+</div>
+
+<!-- DETAILS MODAL -->
+<div id="detailModal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="dName"></h2>
+    <p id="dScore"></p>
+
+    <h3>Why this fits you</h3>
+    <ul id="whyFitList"></ul>
+
+    <h3>Why this may not fit you</h3>
+    <ul id="whyNotFitList"></ul>
+
+    <button onclick="closeDetail()">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
