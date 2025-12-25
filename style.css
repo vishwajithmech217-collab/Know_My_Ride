@@ -135,3 +135,26 @@ button {
   color: #2ecc71;
   font-weight: bold;
 }
+
+.modal-box.wide {
+  max-width: 90%;
+}
+
+.compare-grid {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.compare-card {
+  flex: 1;
+  background: #111827;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.metric {
+  font-size: 13px;
+  margin-top: 6px;
+  color: #cbd5f5;
+}
