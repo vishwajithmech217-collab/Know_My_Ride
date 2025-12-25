@@ -44,7 +44,7 @@
     <button type="button" onclick="toggleAdvanced()">Advanced settings</button>
     <div id="advancedSection" style="display:none;">
       <label>Leg Height (cm) (optional)</label>
-      <input id="legHeight" type="number" placeholder="75">
+<input id="legHeight" type="number" placeholder="75">
       <p class="hint">If left empty, leg height is estimated from your height.</p>
     </div>
   </div>
@@ -53,6 +53,10 @@
 
   <div id="results"></div>
 </div>
+
+<button id="compareBtn" onclick="showCompare()" disabled>
+  Compare Selected Vehicles
+</button>
 
 <!-- DETAILS MODAL -->
 <div id="detailModal" class="modal hidden">
