@@ -25,37 +25,38 @@ let selected = null;
 let compare = [];
 
 /* ===============================
-   UTILITIES
+   UTIL
 ================================ */
 function avg(v) {
   return Math.round((v.comfort + v.control + v.posture + v.cityBias) / 4);
 }
 
 /* ===============================
-   MAIN RECOMMENDATION
+   RECOMMENDATION
 ================================ */
 function recommend() {
   const type = document.getElementById("type").value;
-  const box = document.getElementById("results");
-  box.innerHTML = "";
+  const results = document.getElementById("results");
+  results.innerHTML = "";
 
-  let filtered = vehicles.filter(v => v.type === type);
-  if (filtered.length === 0) return;
+  compare = []; // reset compare
 
-  filtered.sort((a, b) => avg(b) - avg(a));
+  const filtered = vehicles
+    .filter(v => v.type === type)
+    .sort((a, b) => avg(b) - avg(a));
 
   filtered.forEach((v, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
+    const div = document.createElement("div");
+    div.className = "card";
 
-    card.innerHTML = `
-      ${i === 0 ? `<div class="best-tag">⭐ Best for you</div>` : ""}
+    div.innerHTML = `
+      ${i === 0 ? `<div class="best">⭐ Best for you</div>` : ""}
       <b>${v.name}</b><br>
       Score: ${avg(v)}/100
       <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
     `;
 
-    box.appendChild(card);
+    results.appendChild(div);
   });
 }
 
@@ -64,17 +65,14 @@ function recommend() {
 ================================ */
 function showDetail(v) {
   selected = v;
-  document.getElementById("detailModal").classList.remove("hidden");
 
+  document.getElementById("detailModal").classList.remove("hidden");
   document.getElementById("dName").innerText = v.name;
-  document.getElementById("dComfort").style.width = v.comfort + "%";
-  document.getElementById("dControl").style.width = v.control + "%";
-  document.getElementById("dPosture").style.width = v.posture + "%";
-  document.getElementById("dUsage").style.width = v.cityBias + "%";
-  document.getElementById("dScore").innerText = `Overall Score: ${avg(v)}/100`;
+  document.getElementById("dScore").innerText =
+    `Overall Score: ${avg(v)}/100`;
 
   buildWhyFit(v);
-  buildWhyNotFit(v);
+  buildWhyNot(v);
 }
 
 function closeDetail() {
@@ -82,53 +80,53 @@ function closeDetail() {
 }
 
 /* ===============================
-   WHY FIT / WHY NOT FIT
+   WHY FIT / WHY NOT
 ================================ */
 function buildWhyFit(v) {
   const height = Number(document.getElementById("height").value);
   const weight = Number(document.getElementById("weight").value);
   const usage = Number(document.getElementById("usage").value);
 
-  const list = document.getElementById("whyFitList");
+  const list = document.getElementById("whyFit");
   list.innerHTML = "";
 
   if (height >= 165 && height <= 180)
-    list.appendChild(li("Your height supports a comfortable riding posture"));
+    addLi(list, "Your height supports a comfortable posture");
 
   if (weight <= 90)
-    list.appendChild(li("Vehicle balance matches your body weight"));
+    addLi(list, "Vehicle balance matches your body weight");
 
   if (usage > 60)
-    list.appendChild(li("Good stability for highway cruising"));
+    addLi(list, "Stable choice for highway cruising");
   else
-    list.appendChild(li("Very suitable for city traffic"));
+    addLi(list, "Well suited for city traffic");
 
-  list.appendChild(li("Overall, this vehicle suits your usage well"));
+  addLi(list, "Overall, this vehicle suits your needs");
 }
 
-function buildWhyNotFit(v) {
+function buildWhyNot(v) {
   const usage = Number(document.getElementById("usage").value);
-  const list = document.getElementById("whyNotList");
+  const list = document.getElementById("whyNot");
   list.innerHTML = "";
 
   if (v.type === "scooter" && usage > 70)
-    list.appendChild(li("Scooters are less comfortable for long highway rides"));
+    addLi(list, "Scooters are less comfortable for long highway rides");
 
   if (v.cityBias > 75 && usage > 70)
-    list.appendChild(li("Engine tuning favors city riding more"));
+    addLi(list, "Engine tuning favors city riding");
 
   if (list.children.length === 0)
-    list.appendChild(li("No major drawbacks for your usage"));
+    addLi(list, "No major drawbacks for your usage");
 }
 
-function li(text) {
-  const l = document.createElement("li");
-  l.innerText = text;
-  return l;
+function addLi(list, text) {
+  const li = document.createElement("li");
+  li.innerText = text;
+  list.appendChild(li);
 }
 
 /* ===============================
-   COMPARISON LOGIC
+   COMPARISON
 ================================ */
 function selectCompare() {
   if (!selected) return;
@@ -146,44 +144,34 @@ function selectCompare() {
 
 function showCompare() {
   const modal = document.getElementById("compareModal");
+  const box = document.getElementById("compareContent");
+
+  box.innerHTML = "";
+
+  compare.forEach(v => {
+    box.innerHTML += `
+      <p><b>${v.name}</b><br>
+      Overall Score: ${avg(v)}/100</p>
+    `;
+  });
 
   modal.classList.remove("hidden");
-  modal.style.display = "flex"; // force visible
-
-  renderCompare("c1", compare[0]);
-  renderCompare("c2", compare[1]);
-}
-
-
-function renderCompare(id, v) {
-  document.getElementById(id).innerHTML = `
-    <h3>${v.name}</h3>
-    Comfort<div class="bar"><div class="fill" style="width:${v.comfort}%"></div></div>
-    Control<div class="bar"><div class="fill" style="width:${v.control}%"></div></div>
-    Posture<div class="bar"><div class="fill" style="width:${v.posture}%"></div></div>
-    Usage<div class="bar"><div class="fill" style="width:${v.cityBias}%"></div></div>
-    <b>Overall: ${avg(v)}/100</b>
-  `;
+  modal.style.display = "flex";
 }
 
 function closeCompare() {
   const modal = document.getElementById("compareModal");
 
   modal.classList.add("hidden");
-  modal.style.display = "none"; // force hide
+  modal.style.display = "none";
 
-  compare = []; // reset selection
+  compare = [];
 }
 
 /* ===============================
-   UX FIX: TAP OUTSIDE TO CLOSE
+   UX: CLOSE ON OUTSIDE CLICK
 ================================ */
-document.getElementById("compareModal")?.addEventListener("click", e => {
-  if (e.target.id === "compareModal") closeCompare();
-});
-
-// Close comparison when clicking outside modal box
-window.addEventListener("click", function (e) {
+window.addEventListener("click", e => {
   const modal = document.getElementById("compareModal");
   const box = modal.querySelector(".modal-box");
 
