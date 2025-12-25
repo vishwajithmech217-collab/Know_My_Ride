@@ -167,15 +167,21 @@ function showCompare() {
 
 function renderCompare(id, v) {
   document.getElementById(id).innerHTML = `
-    <div class="compare-card">
-      <h3>${v.name}</h3>
-      Comfort: ${v.comfort}<br>
-      Control: ${v.control}<br>
-      Posture: ${v.posture}<br>
-      City Bias: ${v.cityBias}<br>
-      Seat Height: ${v.seatHeight} mm<br>
-      <b>Score: ${finalScore(v)}/100</b>
-    </div>
+    <h3>${v.name}</h3>
+
+    <div class="metric">Comfort</div>
+    <div class="bar"><div class="fill" style="width:${v.comfort}%"></div></div>
+
+    <div class="metric">Control</div>
+    <div class="bar"><div class="fill" style="width:${v.control}%"></div></div>
+
+    <div class="metric">Posture</div>
+    <div class="bar"><div class="fill" style="width:${v.posture}%"></div></div>
+
+    <div class="metric">Usage</div>
+    <div class="bar"><div class="fill" style="width:${v.cityBias}%"></div></div>
+
+    <b>Total Score: ${avg(v)}/100</b>
   `;
 }
 
