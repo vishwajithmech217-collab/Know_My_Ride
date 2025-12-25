@@ -1,169 +1,179 @@
-console.log("JS loaded");
-
-// VEHICLE DATA
+/* ===============================
+   VEHICLE DATA (V3)
+================================ */
 const vehicles = [
-  {name:"Yamaha MT-15", type:"bike", comfort:85, control:90, posture:80, cityBias:60},
-  {name:"Royal Enfield Classic 350", type:"bike", comfort:88, control:75, posture:90, cityBias:55},
-  {name:"TVS Ntorq 125", type:"scooter", comfort:80, control:78, posture:82, cityBias:85},
-  {name:"Honda Activa 6G", type:"scooter", comfort:78, control:76, posture:80, cityBias:90},
-  {name:"Hyundai i20", type:"car", comfort:88, control:85, posture:90, cityBias:55},
-  {name:"Kia Seltos", type:"suv", comfort:90, control:82, posture:92, cityBias:50}
+  // BIKES
+  { name: "Yamaha MT-15", type: "bike", comfort: 85, control: 90, posture: 80, cityBias: 60 },
+  { name: "Royal Enfield Classic 350", type: "bike", comfort: 88, control: 75, posture: 90, cityBias: 55 },
+  { name: "Bajaj Pulsar NS200", type: "bike", comfort: 82, control: 88, posture: 78, cityBias: 65 },
+
+  // SCOOTERS
+  { name: "TVS Ntorq 125", type: "scooter", comfort: 80, control: 78, posture: 82, cityBias: 85 },
+  { name: "Honda Activa 6G", type: "scooter", comfort: 78, control: 76, posture: 80, cityBias: 90 },
+
+  // CARS
+  { name: "Hyundai i20", type: "car", comfort: 88, control: 85, posture: 90, cityBias: 55 },
+
+  // SUV
+  { name: "Kia Seltos", type: "suv", comfort: 90, control: 82, posture: 92, cityBias: 50 }
 ];
 
+/* ===============================
+   GLOBAL STATE
+================================ */
 let selected = null;
 let compare = [];
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-// SCORE
-function avg(v){
+/* ===============================
+   UTILITIES
+================================ */
+function avg(v) {
   return Math.round((v.comfort + v.control + v.posture + v.cityBias) / 4);
 }
 
-function seatHeightScore(userHeight, seatHeight) {
-  // Ideal seat height ≈ 45% of user height
-  const idealSeat = userHeight * 0.45;
-  const diff = Math.abs(seatHeight - idealSeat);
-
-  // Smaller difference = better score
-  return clamp(30 - diff * 0.3, 0, 30);
-}
-
-function weightScore(userWeight, vehicleWeight) {
-  if (vehicleWeight <= userWeight + 40) return 20;
-  if (vehicleWeight <= userWeight + 70) return 12;
-  return 5;
-}
-
-function usageScore(userUsage, vehicleBias) {
-  // userUsage: 0 = city, 100 = highway
-
-  if (vehicleBias === "city") {
-    return clamp(30 - userUsage * 0.3, 5, 30);
-  }
-
-  if (vehicleBias === "highway") {
-    return clamp(userUsage * 0.3, 5, 30);
-  }
-
-  // mixed
-  return 25;
-}
-
-function frequencyScore(freqValue, engineCC) {
-  // freqValue: 0 = occasional, 100 = daily
-
-  if (freqValue > 60 && engineCC < 110) return 8;
-  if (freqValue > 60 && engineCC >= 125) return 15;
-  if (freqValue <= 60) return 10;
-
-  return 12;
-}
-
-function calculateScore(vehicle) {
-  const height = Number(document.getElementById("height").value);
-  const weight = Number(document.getElementById("weight").value);
-  const usage = Number(document.getElementById("usage").value);
-  const frequency = Number(document.getElementById("frequency").value);
-
-  let score = 0;
-
-  score += seatHeightScore(height, vehicle.seatHeight);
-  score += weightScore(weight, vehicle.kerbWeight);
-  score += usageScore(usage, vehicle.usageBias);
-  score += frequencyScore(frequency, vehicle.engineCC);
-
-  return Math.round(score);
-}
-
-// MAIN LOGIC
+/* ===============================
+   MAIN RECOMMENDATION
+================================ */
 function recommend() {
   const type = document.getElementById("type").value;
   const box = document.getElementById("results");
   box.innerHTML = "";
 
-  const filtered = vehicles
-    .filter(v => v.type === type)
-    .map(v => ({ ...v, score: calculateScore(v) }))
-    .sort((a, b) => b.score - a.score);
+  let filtered = vehicles.filter(v => v.type === type);
+  if (filtered.length === 0) return;
 
-  filtered.forEach((v, index) => {
-    const div = document.createElement("div");
-    div.className = "card";
+  filtered.sort((a, b) => avg(b) - avg(a));
 
-    div.innerHTML = `
-      ${index === 0 ? "<div class='best-tag'>⭐ Best for you</div>" : ""}
+  filtered.forEach((v, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      ${i === 0 ? `<div class="best-tag">⭐ Best for you</div>` : ""}
       <b>${v.name}</b><br>
-      Score: ${v.score}/100
+      Score: ${avg(v)}/100
       <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
     `;
 
-    box.appendChild(div);
+    box.appendChild(card);
   });
 }
 
-// DETAIL VIEW
-function showDetail(v){
+/* ===============================
+   DETAIL MODAL
+================================ */
+function showDetail(v) {
   selected = v;
   document.getElementById("detailModal").classList.remove("hidden");
-  document.getElementById("dName").innerText = v.name;
-  document.getElementById("dScore").innerText = "Overall Score: " + avg(v) + "/100";
 
-  buildWhy(v);
-  buildWhyNot(v);
+  document.getElementById("dName").innerText = v.name;
+  document.getElementById("dComfort").style.width = v.comfort + "%";
+  document.getElementById("dControl").style.width = v.control + "%";
+  document.getElementById("dPosture").style.width = v.posture + "%";
+  document.getElementById("dUsage").style.width = v.cityBias + "%";
+  document.getElementById("dScore").innerText = `Overall Score: ${avg(v)}/100`;
+
+  buildWhyFit(v);
+  buildWhyNotFit(v);
 }
 
-function closeDetail(){
+function closeDetail() {
   document.getElementById("detailModal").classList.add("hidden");
 }
 
-// WHY FITS
-function buildWhy(v){
-  const ul = document.getElementById("whyFit");
-  ul.innerHTML = "";
+/* ===============================
+   WHY FIT / WHY NOT FIT
+================================ */
+function buildWhyFit(v) {
   const height = Number(document.getElementById("height").value);
+  const weight = Number(document.getElementById("weight").value);
   const usage = Number(document.getElementById("usage").value);
 
-  if(height >= 165 && height <= 180) ul.innerHTML += "<li>Comfortable posture for your height</li>";
-  if(usage > 50) ul.innerHTML += "<li>Good stability for highway rides</li>";
-  else ul.innerHTML += "<li>Easy to use in city traffic</li>";
-}
+  const list = document.getElementById("whyFitList");
+  list.innerHTML = "";
 
-// WHY NOT
-function buildWhyNot(v){
-  const ul = document.getElementById("whyNot");
-  ul.innerHTML = "";
-  const usage = Number(document.getElementById("usage").value);
+  if (height >= 165 && height <= 180)
+    list.appendChild(li("Your height supports a comfortable riding posture"));
 
-  if(v.type==="scooter" && usage > 70)
-    ul.innerHTML += "<li>Not ideal for long highway rides</li>";
+  if (weight <= 90)
+    list.appendChild(li("Vehicle balance matches your body weight"));
+
+  if (usage > 60)
+    list.appendChild(li("Good stability for highway cruising"));
   else
-    ul.innerHTML += "<li>No major drawbacks</li>";
+    list.appendChild(li("Very suitable for city traffic"));
+
+  list.appendChild(li("Overall, this vehicle suits your usage well"));
 }
 
-// COMPARE
-function selectCompare(){
-  if(selected && compare.length < 2 && !compare.includes(selected)){
+function buildWhyNotFit(v) {
+  const usage = Number(document.getElementById("usage").value);
+  const list = document.getElementById("whyNotList");
+  list.innerHTML = "";
+
+  if (v.type === "scooter" && usage > 70)
+    list.appendChild(li("Scooters are less comfortable for long highway rides"));
+
+  if (v.cityBias > 75 && usage > 70)
+    list.appendChild(li("Engine tuning favors city riding more"));
+
+  if (list.children.length === 0)
+    list.appendChild(li("No major drawbacks for your usage"));
+}
+
+function li(text) {
+  const l = document.createElement("li");
+  l.innerText = text;
+  return l;
+}
+
+/* ===============================
+   COMPARISON LOGIC
+================================ */
+function selectCompare() {
+  if (!selected) return;
+
+  if (!compare.includes(selected) && compare.length < 2) {
     compare.push(selected);
   }
+
   closeDetail();
-  if(compare.length === 2){
-    document.getElementById("compareBtn").classList.remove("hidden");
+
+  if (compare.length === 2) {
+    showCompare();
   }
 }
 
-function openCompare(){
-  const box = document.getElementById("compareBox");
-  box.innerHTML = "";
-  compare.forEach(v=>{
-    box.innerHTML += `<p><b>${v.name}</b> – ${avg(v)}/100</p>`;
-  });
-  document.getElementById("compareModal").classList.remove("hidden");
+function showCompare() {
+  const modal = document.getElementById("compareModal");
+  modal.classList.remove("hidden");
+  modal.style.display = "flex";
+
+  renderCompare("c1", compare[0]);
+  renderCompare("c2", compare[1]);
 }
 
-function closeCompare(){
-  document.getElementById("compareModal").classList.add("hidden");
+function renderCompare(id, v) {
+  document.getElementById(id).innerHTML = `
+    <h3>${v.name}</h3>
+    Comfort<div class="bar"><div class="fill" style="width:${v.comfort}%"></div></div>
+    Control<div class="bar"><div class="fill" style="width:${v.control}%"></div></div>
+    Posture<div class="bar"><div class="fill" style="width:${v.posture}%"></div></div>
+    Usage<div class="bar"><div class="fill" style="width:${v.cityBias}%"></div></div>
+    <b>Overall: ${avg(v)}/100</b>
+  `;
+}
+
+function closeCompare() {
+  const modal = document.getElementById("compareModal");
+  modal.classList.add("hidden");
+  modal.style.display = "none";
   compare = [];
 }
+
+/* ===============================
+   UX FIX: TAP OUTSIDE TO CLOSE
+================================ */
+document.getElementById("compareModal")?.addEventListener("click", e => {
+  if (e.target.id === "compareModal") closeCompare();
+});
