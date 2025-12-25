@@ -138,22 +138,25 @@ function closeDetail() {
 function addToCompare() {
   if (!selectedVehicle) return;
 
-  if (compareList.length >= 2) {
-    alert("You can compare only 2 vehicles at a time");
-    return;
-  }
+  const index = compareList.findIndex(
+    v => v.name === selectedVehicle.name
+  );
 
-  if (!compareList.find(v => v.name === selectedVehicle.name)) {
+  // If already selected → REMOVE
+  if (index !== -1) {
+    compareList.splice(index, 1);
+  } 
+  // If not selected → ADD (max 2)
+  else {
+    if (compareList.length >= 2) {
+      alert("You can compare only 2 vehicles");
+      return;
+    }
     compareList.push(selectedVehicle);
   }
 
   closeDetail();
-
-  if (compareList.length === 2) {
-    document.getElementById("compareBtn").disabled = false;
-  }
-
-  recommend(); // re-render to show selected tag
+  recommend(); // refresh cards
 }
 
 function showCompare() {
