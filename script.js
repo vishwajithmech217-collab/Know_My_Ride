@@ -146,12 +146,14 @@ function selectCompare() {
 
 function showCompare() {
   const modal = document.getElementById("compareModal");
+
   modal.classList.remove("hidden");
-  modal.style.display = "flex";
+  modal.style.display = "flex"; // force visible
 
   renderCompare("c1", compare[0]);
   renderCompare("c2", compare[1]);
 }
+
 
 function renderCompare(id, v) {
   document.getElementById(id).innerHTML = `
@@ -166,9 +168,11 @@ function renderCompare(id, v) {
 
 function closeCompare() {
   const modal = document.getElementById("compareModal");
+
   modal.classList.add("hidden");
-  modal.style.display = "none";
-  compare = [];
+  modal.style.display = "none"; // force hide
+
+  compare = []; // reset selection
 }
 
 /* ===============================
@@ -176,4 +180,14 @@ function closeCompare() {
 ================================ */
 document.getElementById("compareModal")?.addEventListener("click", e => {
   if (e.target.id === "compareModal") closeCompare();
+});
+
+// Close comparison when clicking outside modal box
+window.addEventListener("click", function (e) {
+  const modal = document.getElementById("compareModal");
+  const box = modal.querySelector(".modal-box");
+
+  if (!modal.classList.contains("hidden") && !box.contains(e.target)) {
+    closeCompare();
+  }
 });
