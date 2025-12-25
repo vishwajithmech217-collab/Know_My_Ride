@@ -1,68 +1,11 @@
-body {
-  font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  margin: 0;
-  padding: 20px;
-}
-
-.container {
-  max-width: 420px;
-  margin: auto;
-  background: #020617;
-  padding: 20px;
-  border-radius: 14px;
-}
-
-label {
-  display: block;
+.advanced-box button {
+  background: #1e293b;
   margin-top: 12px;
-  font-size: 14px;
 }
 
-input, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin-top: 4px;
-}
-
-button {
-  width: 100%;
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #22c55e;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.slider-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  opacity: 0.8;
-}
-
-.slider-text {
-  text-align: center;
-  font-size: 13px;
-  color: #9fbfff;
-}
-
-.card {
-  background: #020617;
-  border: 1px solid #1e293b;
-  padding: 12px;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.best-tag {
-  color: #22c55e;
-  font-size: 13px;
+.hint {
+  font-size: 12px;
+  opacity: 0.7;
 }
 
 .modal {
@@ -74,13 +17,27 @@ button {
   justify-content: center;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 .modal-box {
   background: #020617;
   padding: 20px;
   border-radius: 12px;
   max-width: 320px;
+}
+
+.modal-box.wide {
+  max-width: 600px;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.compare-card {
+  border: 1px solid #1e293b;
+  padding: 12px;
+  border-radius: 10px;
 }
