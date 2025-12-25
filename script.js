@@ -13,32 +13,94 @@ const vehicles = [
 let selected = null;
 let compare = [];
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
 // SCORE
 function avg(v){
   return Math.round((v.comfort + v.control + v.posture + v.cityBias) / 4);
 }
 
+function seatHeightScore(userHeight, seatHeight) {
+  // Ideal seat height ≈ 45% of user height
+  const idealSeat = userHeight * 0.45;
+  const diff = Math.abs(seatHeight - idealSeat);
+
+  // Smaller difference = better score
+  return clamp(30 - diff * 0.3, 0, 30);
+}
+
+function weightScore(userWeight, vehicleWeight) {
+  if (vehicleWeight <= userWeight + 40) return 20;
+  if (vehicleWeight <= userWeight + 70) return 12;
+  return 5;
+}
+
+function usageScore(userUsage, vehicleBias) {
+  // userUsage: 0 = city, 100 = highway
+
+  if (vehicleBias === "city") {
+    return clamp(30 - userUsage * 0.3, 5, 30);
+  }
+
+  if (vehicleBias === "highway") {
+    return clamp(userUsage * 0.3, 5, 30);
+  }
+
+  // mixed
+  return 25;
+}
+
+function frequencyScore(freqValue, engineCC) {
+  // freqValue: 0 = occasional, 100 = daily
+
+  if (freqValue > 60 && engineCC < 110) return 8;
+  if (freqValue > 60 && engineCC >= 125) return 15;
+  if (freqValue <= 60) return 10;
+
+  return 12;
+}
+
+function calculateScore(vehicle) {
+  const height = Number(document.getElementById("height").value);
+  const weight = Number(document.getElementById("weight").value);
+  const usage = Number(document.getElementById("usage").value);
+  const frequency = Number(document.getElementById("frequency").value);
+
+  let score = 0;
+
+  score += seatHeightScore(height, vehicle.seatHeight);
+  score += weightScore(weight, vehicle.kerbWeight);
+  score += usageScore(usage, vehicle.usageBias);
+  score += frequencyScore(frequency, vehicle.engineCC);
+
+  return Math.round(score);
+}
+
 // MAIN LOGIC
-function recommend(){
+function recommend() {
   const type = document.getElementById("type").value;
-  const results = document.getElementById("results");
-  results.innerHTML = "";
-  compare = [];
-  document.getElementById("compareBtn").classList.add("hidden");
+  const box = document.getElementById("results");
+  box.innerHTML = "";
 
-  let filtered = vehicles.filter(v => v.type === type);
-  filtered.sort((a,b)=>avg(b)-avg(a));
+  const filtered = vehicles
+    .filter(v => v.type === type)
+    .map(v => ({ ...v, score: calculateScore(v) }))
+    .sort((a, b) => b.score - a.score);
 
-  filtered.forEach((v,i)=>{
+  filtered.forEach((v, index) => {
     const div = document.createElement("div");
     div.className = "card";
+
     div.innerHTML = `
-      ${i===0 ? "<div class='best'>⭐ Best for you</div>" : ""}
+      ${index === 0 ? "<div class='best-tag'>⭐ Best for you</div>" : ""}
       <b>${v.name}</b><br>
-      Score: ${avg(v)}/100<br><br>
+      Score: ${v.score}/100
       <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
     `;
-    results.appendChild(div);
+
+    box.appendChild(div);
   });
 }
 
