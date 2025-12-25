@@ -1,7 +1,119 @@
+/* ===============================
+   GLOBAL
+================================ */
+body {
+  font-family: system-ui, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ===============================
+   CONTAINER
+================================ */
+.container {
+  max-width: 420px;
+  margin: auto;
+  background: #020617;
+  padding: 20px;
+  border-radius: 14px;
+}
+
+/* ===============================
+   FORM ELEMENTS
+================================ */
+label {
+  display: block;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 4px;
+}
+
+button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #22c55e;
+  color: #022c22;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ===============================
+   SLIDERS
+================================ */
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.slider-text {
+  text-align: center;
+  font-size: 13px;
+  color: #9fbfff;
+}
+
+/* ===============================
+   RESULT CARDS
+================================ */
+.card {
+  background: #020617;
+  border: 1px solid #1e293b;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.best-tag {
+  color: #22c55e;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.selected-tag {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+/* ===============================
+   ADVANCED BOX
+================================ */
+.advanced-box button {
+  background: #1e293b;
+  margin-top: 12px;
+}
+
+.hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ===============================
+   MODALS (IMPORTANT)
+================================ */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,8 +129,31 @@
   padding: 20px;
   border-radius: 12px;
   max-width: 320px;
+  width: 100%;
 }
 
 .modal-box.wide {
   max-width: 90%;
+}
+
+/* ===============================
+   COMPARISON
+================================ */
+.compare-grid {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.compare-card {
+  flex: 1;
+  background: #111827;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.metric {
+  font-size: 13px;
+  margin-top: 6px;
+  color: #cbd5f5;
 }
