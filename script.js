@@ -9,29 +9,44 @@ const vehicles = [
   {name:"Kia Seltos", type:"suv", comfort:90, control:82, posture:92, cityBias:50, seatHeight:600}
 ];
 
+let selectedVehicle = null;
+let compareList = [];
+
+// ---------- HELPERS ----------
+
+function toggleAdvanced() {
+  const box = document.getElementById("advancedSection");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+function getLegHeight() {
+  const manual = Number(document.getElementById("legHeight")?.value);
+  if (manual && manual > 40) return manual;
+
+  const height = Number(document.getElementById("height").value);
+  if (!height || height < 120) return null;
+
+  return height * 0.45; // estimated
+}
+
 function avg(v) {
   return Math.round((v.comfort + v.control + v.posture + v.cityBias) / 4);
 }
 
-function getEstimatedLegHeight() {
-  const h = Number(document.getElementById("height").value);
-  if (!h || h < 120) return null;
-  return h * 0.45;
-}
-
 function finalScore(v) {
   let score = avg(v);
-  const leg = getEstimatedLegHeight();
+  const leg = getLegHeight();
   if (!leg) return score;
 
   const reach = leg * 10 * 0.9;
-
   if (v.seatHeight > reach + 40) score -= 6;
   else if (v.seatHeight > reach) score -= 3;
   else score += 2;
 
   return Math.max(0, Math.min(score, 100));
 }
+
+// ---------- MAIN ----------
 
 function recommend() {
   const type = document.getElementById("type").value;
@@ -55,28 +70,35 @@ function recommend() {
   });
 }
 
+// ---------- DETAILS ----------
+
 function buildWhyFit(v) {
-  const reasons = [];
-  reasons.push("Recommendation based on your height and usage");
-  reasons.push("Overall balance suits your riding needs");
-  return reasons;
+  return [
+    "Recommendation based on your height and usage",
+    "Overall balance suits your riding profile"
+  ];
 }
 
 function buildWhyNotFit(v) {
   const warnings = [];
-  const leg = getEstimatedLegHeight();
+  const leg = getLegHeight();
+
   if (leg) {
     const reach = leg * 10 * 0.9;
     if (v.seatHeight > reach + 40)
       warnings.push("Seat height may feel tall when stopping");
   }
+
   if (warnings.length === 0)
     warnings.push("No major drawbacks found");
+
   return warnings;
 }
 
 function showDetail(v) {
+  selectedVehicle = v;
   document.getElementById("detailModal").classList.remove("hidden");
+
   document.getElementById("dName").innerText = v.name;
   document.getElementById("dScore").innerText =
     `Overall Score: ${finalScore(v)}/100`;
@@ -102,7 +124,49 @@ function closeDetail() {
   document.getElementById("detailModal").classList.add("hidden");
 }
 
-/* Slider text */
+// ---------- COMPARE ----------
+
+function addToCompare() {
+  if (!selectedVehicle) return;
+
+  if (!compareList.find(v => v.name === selectedVehicle.name)) {
+    compareList.push(selectedVehicle);
+  }
+
+  closeDetail();
+
+  if (compareList.length === 2) {
+    showCompare();
+  }
+}
+
+function showCompare() {
+  document.getElementById("compareModal").classList.remove("hidden");
+  renderCompare("c1", compareList[0]);
+  renderCompare("c2", compareList[1]);
+}
+
+function renderCompare(id, v) {
+  document.getElementById(id).innerHTML = `
+    <div class="compare-card">
+      <h3>${v.name}</h3>
+      Comfort: ${v.comfort}<br>
+      Control: ${v.control}<br>
+      Posture: ${v.posture}<br>
+      City Bias: ${v.cityBias}<br>
+      Seat Height: ${v.seatHeight} mm<br>
+      <b>Score: ${finalScore(v)}/100</b>
+    </div>
+  `;
+}
+
+function closeCompare() {
+  document.getElementById("compareModal").classList.add("hidden");
+  compareList = [];
+}
+
+// ---------- SLIDER TEXT ----------
+
 document.addEventListener("DOMContentLoaded", () => {
   const usage = document.getElementById("usage");
   const usageText = document.getElementById("usageText");
