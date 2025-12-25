@@ -135,6 +135,11 @@ function closeDetail() {
 function addToCompare() {
   if (!selectedVehicle) return;
 
+  if (compareList.length >= 2) {
+    alert("You can compare only 2 vehicles at a time");
+    return;
+  }
+
   if (!compareList.find(v => v.name === selectedVehicle.name)) {
     compareList.push(selectedVehicle);
   }
@@ -144,6 +149,8 @@ function addToCompare() {
   if (compareList.length === 2) {
     document.getElementById("compareBtn").disabled = false;
   }
+
+  recommend(); // re-render to show selected tag
 }
 
 function showCompare() {
