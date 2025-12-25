@@ -1,4 +1,4 @@
-console.log("SCRIPT LOADED");
+console.log("JS loaded");
 
 const vehicles = [
   {name:"Yamaha MT-15", type:"bike", comfort:85, control:90, posture:80, cityBias:60, seatHeight:810},
