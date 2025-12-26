@@ -109,4 +109,5 @@ function openCompare() {
 function closeCompare() {
   document.getElementById("compareModal").classList.add("hidden");
   compare = [];
+button.stylye.dusplay ="none"
 }
