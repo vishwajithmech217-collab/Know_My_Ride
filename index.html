@@ -7,59 +7,79 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Know Your Ride</h1>
 
-    <label>Height (cm)</label>
-    <input id="height" type="number" value="170">
+<div class="container">
+  <h1>Know Your Ride</h1>
 
-    <label>Weight (kg)</label>
-    <input id="weight" type="number" value="70">
+  <label>Height (cm)</label>
+  <input id="height" type="number" value="170">
 
-    <label>Vehicle Type</label>
-    <select id="type">
-      <option value="bike">Bike</option>
-      <option value="scooter">Scooter</option>
-      <option value="car">Car</option>
-      <option value="suv">SUV</option>
-    </select>
+  <label>Weight (kg)</label>
+  <input id="weight" type="number" value="70">
 
-    <label>Usage (City ↔ Highway)</label>
-    <input id="usage" type="range" min="0" max="100" value="50">
+  <label>Vehicle Type</label>
+  <select id="type">
+    <option value="bike">Bike</option>
+    <option value="scooter">Scooter</option>
+    <option value="car">Car</option>
+    <option value="suv">SUV</option>
+  </select>
 
-    <label>Usage Frequency (Occasional ↔ Daily)</label>
-    <input id="frequency" type="range" min="0" max="100" value="50">
+  <label>Usage (City ↔ Highway)</label>
+  <input id="usage" type="range" min="0" max="100" value="50">
+  <div class="slider-text" id="usageText">Balanced usage</div>
 
-    <button onclick="recommend()">Get Recommendation</button>
+  <label>Usage Frequency (Occasional ↔ Daily)</label>
+  <input id="frequency" type="range" min="0" max="100" value="50">
+  <div class="slider-text" id="freqText">Moderate usage</div>
 
-    <div id="results"></div>
+  <button onclick="toggleAdvanced()">Advanced Options</button>
 
-    <button id="compareBtn" class="hidden" onclick="openCompare()">Compare Selected Vehicles</button>
-
-    <!-- DETAILS MODAL -->
-    <div id="detailModal" class="modal hidden">
-      <div class="modal-box">
-        <h3 id="dName"></h3>
-        <p id="dScore"></p>
-        <b>Why this fits you</b>
-        <ul id="whyFit"></ul>
-        <b>Why this may not fit</b>
-        <ul id="whyNot"></ul>
-        <button onclick="selectCompare()">Select for Compare</button>
-        <button onclick="closeDetail()">Close</button>
-      </div>
-    </div>
-
-    <!-- COMPARE MODAL -->
-    <div id="compareModal" class="modal hidden">
-      <div class="modal-box wide">
-        <h2>Comparison</h2>
-        <div id="compareContent" class="compare-grid"></div>
-        <button onclick="closeCompare()">Close</button>
-      </div>
-    </div>
+  <div id="advancedBox" class="advanced hidden">
+    <label>Leg Height (cm) – Optional</label>
+    <input id="legHeight" type="number" placeholder="Optional">
+    <p class="hint">Used to fine-tune seat height match</p>
   </div>
 
-  <script src="script.js"></script>
+  <button onclick="recommend()">Get Recommendation</button>
+
+  <div id="results"></div>
+</div>
+
+<!-- DETAILS MODAL -->
+<div id="detailModal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="dName"></h2>
+    <p id="dScore"></p>
+
+    <h3>Fit Analysis</h3>
+    <div class="chart">
+      <div><span>Comfort</span><div class="bar"><div id="barComfort"></div></div></div>
+      <div><span>Control</span><div class="bar"><div id="barControl"></div></div></div>
+      <div><span>Posture</span><div class="bar"><div id="barPosture"></div></div></div>
+      <div><span>Usage</span><div class="bar"><div id="barUsage"></div></div></div>
+    </div>
+
+    <h3>Why this fits you</h3>
+    <ul id="whyFit"></ul>
+
+    <h3>Why this may not fit</h3>
+    <ul id="whyNot"></ul>
+
+    <button onclick="selectCompare()">Select for Compare</button>
+    <button onclick="closeDetail()">Close</button>
+  </div>
+</div>
+
+<!-- COMPARE MODAL -->
+<div id="compareModal" class="modal hidden">
+  <div class="modal-box wide">
+    <h2>Comparison</h2>
+    <div id="compareContent" class="compare-grid"></div>
+    <button onclick="closeCompare()">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
