@@ -77,6 +77,7 @@ function selectCompare() {
   if (!compare.includes(selected)) {
     compare.push(selected);
   }
+
   closeDetail();
 
   if (compare.length === 2) {
@@ -98,7 +99,7 @@ function openCompare() {
         Control: ${v.control}<br>
         Posture: ${v.posture}<br>
         Usage: ${v.cityBias}<br>
-        <b>Total: ${avg(v)}</b>
+        <b>Total: ${avg(v)}/100</b>
       </div>
     `;
   });
@@ -109,5 +110,4 @@ function openCompare() {
 function closeCompare() {
   document.getElementById("compareModal").classList.add("hidden");
   compare = [];
-button.stylye.display ="none"
 }
