@@ -1,232 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Know Your Ride – V3</title>
-
-<style>
-/* ===== GLOBAL ===== */
-body {
-  font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  margin: 0;
-  padding: 20px;
-}
-
-.container {
-  max-width: 420px;
-  margin: auto;
-  background: #020617;
-  padding: 20px;
-  border-radius: 14px;
-}
-
-label {
-  display: block;
-  margin-top: 12px;
-  font-size: 14px;
-}
-
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin-top: 4px;
-}
-
-button {
-  background: #22c55e;
-  color: #022c22;
-  font-weight: bold;
-  margin-top: 16px;
-  cursor: pointer;
-}
-
-/* ===== CARDS ===== */
-.card {
-  background: #020617;
-  border: 1px solid #1e293b;
-  padding: 12px;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.best {
-  color: #22c55e;
-  font-size: 13px;
-  margin-bottom: 4px;
-}
-
-/* ===== MODALS ===== */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: none;              /* 🔴 IMPORTANT */
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal.show {
-  display: flex;              /* ✅ ONLY when opened */
-}
-
-.modal-box {
-  background: #020617;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Know Your Ride – V3</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <div class="container">
+    <h1>Know Your Ride</h1>
 
-<div class="container">
-<h2>Know Your Ride</h2>
+    <label>Height (cm)</label>
+    <input id="height" type="number" value="170">
 
-<label>Height (cm)</label>
-<input id="height" type="number" value="170">
+    <label>Weight (kg)</label>
+    <input id="weight" type="number" value="70">
 
-<label>Weight (kg)</label>
-<input id="weight" type="number" value="70">
+    <label>Vehicle Type</label>
+    <select id="type">
+      <option value="bike">Bike</option>
+      <option value="scooter">Scooter</option>
+      <option value="car">Car</option>
+      <option value="suv">SUV</option>
+    </select>
 
-<label>Vehicle Type</label>
-<select id="type">
-  <option value="bike">Bike</option>
-  <option value="scooter">Scooter</option>
-  <option value="car">Car</option>
-  <option value="suv">SUV</option>
-</select>
+    <label>Usage (City ↔ Highway)</label>
+    <input id="usage" type="range" min="0" max="100" value="50">
 
-<label>Usage (City ↔ Highway)</label>
-<input id="usage" type="range" min="0" max="100" value="50">
+    <label>Usage Frequency (Occasional ↔ Daily)</label>
+    <input id="frequency" type="range" min="0" max="100" value="50">
 
-<button onclick="recommend()">Get Recommendation</button>
+    <button onclick="recommend()">Get Recommendation</button>
 
-<div id="results"></div>
-</div>
+    <div id="results"></div>
 
-<!-- DETAIL MODAL -->
-<div id="detailModal" class="modal">
-  <div class="modal-box">
-    <h3 id="dName"></h3>
-    <p id="dScore"></p>
+    <button id="compareBtn" class="hidden" onclick="openCompare()">Compare Selected Vehicles</button>
 
-    <b>Why this fits you</b>
-    <ul id="whyFit"></ul>
+    <!-- DETAILS MODAL -->
+    <div id="detailModal" class="modal hidden">
+      <div class="modal-box">
+        <h3 id="dName"></h3>
+        <p id="dScore"></p>
+        <b>Why this fits you</b>
+        <ul id="whyFit"></ul>
+        <b>Why this may not fit</b>
+        <ul id="whyNot"></ul>
+        <button onclick="selectCompare()">Select for Compare</button>
+        <button onclick="closeDetail()">Close</button>
+      </div>
+    </div>
 
-    <b>Why this may not fit</b>
-    <ul id="whyNot"></ul>
-
-    <button onclick="selectCompare()">Select for Compare</button>
-    <button onclick="closeDetail()">Close</button>
+    <!-- COMPARE MODAL -->
+    <div id="compareModal" class="modal hidden">
+      <div class="modal-box wide">
+        <h2>Comparison</h2>
+        <div id="compareContent" class="compare-grid"></div>
+        <button onclick="closeCompare()">Close</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- COMPARE MODAL -->
-<div id="compareModal" class="modal">
-  <div class="modal-box">
-    <h3>Comparison</h3>
-    <div id="compareContent"></div>
-    <button onclick="closeCompare()">Close</button>
-  </div>
-</div>
-
-<script>
-/* ===== VEHICLES ===== */
-const vehicles = [
-  { name:"Yamaha MT-15", type:"bike", comfort:85, control:90, posture:80, cityBias:60 },
-  { name:"Royal Enfield Classic 350", type:"bike", comfort:88, control:75, posture:90, cityBias:55 },
-  { name:"TVS Ntorq 125", type:"scooter", comfort:80, control:78, posture:82, cityBias:85 },
-  { name:"Honda Activa 6G", type:"scooter", comfort:78, control:76, posture:80, cityBias:90 },
-  { name:"Hyundai i20", type:"car", comfort:88, control:85, posture:90, cityBias:55 },
-  { name:"Kia Seltos", type:"suv", comfort:90, control:82, posture:92, cityBias:50 }
-];
-
-let selected = null;
-let compare = [];
-
-function avg(v){
-  return Math.round((v.comfort + v.control + v.posture + v.cityBias)/4);
-}
-
-/* ===== RECOMMEND ===== */
-function recommend(){
-  const type = document.getElementById("type").value;
-  const results = document.getElementById("results");
-  results.innerHTML = "";
-  compare = [];
-
-  const list = vehicles.filter(v => v.type === type)
-                       .sort((a,b)=>avg(b)-avg(a));
-
-  list.forEach((v,i)=>{
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      ${i===0?'<div class="best">⭐ Best for you</div>':''}
-      <b>${v.name}</b><br>
-      Score: ${avg(v)}/100<br>
-      <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
-    `;
-    results.appendChild(div);
-  });
-}
-
-/* ===== DETAIL ===== */
-function showDetail(v){
-  selected = v;
-  document.getElementById("detailModal").classList.add("show");
-
-  document.getElementById("dName").innerText = v.name;
-  document.getElementById("dScore").innerText = `Score: ${avg(v)}/100`;
-
-  document.getElementById("whyFit").innerHTML =
-    "<li>Good posture match</li><li>Comfortable for usage</li>";
-
-  document.getElementById("whyNot").innerHTML =
-    "<li>No major drawbacks</li>";
-}
-
-function closeDetail(){
-  document.getElementById("detailModal").classList.remove("show");
-}
-
-/* ===== COMPARE ===== */
-function selectCompare(){
-  if(!compare.includes(selected)) compare.push(selected);
-  closeDetail();
-  if(compare.length===2) openCompare();
-}
-
-function openCompare(){
-  const box = document.getElementById("compareContent");
-  box.innerHTML = "";
-  compare.forEach(v=>{
-    box.innerHTML += `
-      <div class="card">
-        <b>${v.name}</b><br>
-        Comfort: ${v.comfort}<br>
-        Control: ${v.control}<br>
-        Posture: ${v.posture}<br>
-        Usage: ${v.cityBias}<br>
-        <b>Total: ${avg(v)}</b>
-      </div>`;
-  });
-  document.getElementById("compareModal").classList.add("show");
-}
-
-function closeCompare(){
-  document.getElementById("compareModal").classList.remove("show");
-  compare = [];
-}
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
