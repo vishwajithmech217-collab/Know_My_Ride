@@ -10,93 +10,131 @@ const vehicles = [
 let selected = null;
 let compare = [];
 
-function toggleAdvanced(){
-  document.getElementById("advancedBox").classList.toggle("hidden");
+/* ===============================
+   HELPERS
+================================ */
+function $(id) {
+  return document.getElementById(id);
 }
 
-function avg(v){
-  const h = Number(height.value);
-  const usage = Number(usage.value);
-  const freq = Number(frequency.value);
-  const leg = Number(legHeight.value || h*0.45);
+function avg(v) {
+  const height = Number($("height").value);
+  const usage = Number($("usage").value);
+  const freq = Number($("frequency").value);
+  const leg = Number($("legHeight")?.value || height * 0.45);
 
   const idealSeat = leg * 0.9;
   let seatScore = 100 - Math.abs(v.seat - idealSeat) * 0.2;
   seatScore = Math.max(60, Math.min(100, seatScore));
 
-  let score =
-    v.comfort*0.25 +
-    v.control*0.25 +
-    v.posture*0.25 +
-    v.cityBias*0.25;
+  let base =
+    v.comfort * 0.25 +
+    v.control * 0.25 +
+    v.posture * 0.25 +
+    v.cityBias * 0.25;
 
-  if(freq>70) score += (v.comfort-75)*0.3;
-  if(freq<40) score += (v.control-75)*0.2;
-  if(usage>60) score += (60-v.cityBias)*0.15;
-  if(usage<40) score += (v.cityBias-60)*0.15;
+  if (freq > 70) base += (v.comfort - 75) * 0.3;
+  if (usage > 60) base -= (v.cityBias - 50) * 0.15;
 
-  score = (score*0.8 + seatScore*0.2);
-  return Math.round(Math.max(0, Math.min(100, score)));
+  return Math.round(base * 0.8 + seatScore * 0.2);
 }
 
-function recommend(){
-  usageText.innerText = usage.value<40?"City focused":usage.value>60?"Highway focused":"Balanced usage";
-  freqText.innerText = frequency.value<40?"Occasional usage":frequency.value>70?"Daily usage":"Moderate usage";
-
-  results.innerHTML="";
-  compare=[];
-
-  vehicles.filter(v=>v.type===type.value)
-    .sort((a,b)=>avg(b)-avg(a))
-    .forEach((v,i)=>{
-      const c=document.createElement("div");
-      c.className="card";
-      c.innerHTML=`
-        ${i===0?'<div class="best">⭐ Best for you</div>':''}
-        <b>${v.name}</b><br>
-        Score: ${avg(v)}/100
-        <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
-      `;
-      results.appendChild(c);
-    });
+/* ===============================
+   ADVANCED TOGGLE
+================================ */
+function toggleAdvanced() {
+  $("advancedBox").classList.toggle("hidden");
 }
 
-function showDetail(v){
-  selected=v;
-  detailModal.classList.remove("hidden");
+/* ===============================
+   MAIN RECOMMENDATION
+================================ */
+function recommend() {
+  const type = $("type").value;
+  const results = $("results");
 
-  dName.innerText=v.name;
-  dScore.innerText=`Overall Score: ${avg(v)}/100`;
+  results.innerHTML = "";
+  compare = [];
 
-  barComfort.style.width=v.comfort+"%";
-  barControl.style.width=v.control+"%";
-  barPosture.style.width=v.posture+"%";
-  barUsage.style.width=v.cityBias+"%";
+  const usageVal = Number($("usage").value);
+  const freqVal = Number($("frequency").value);
 
-  whyFit.innerHTML="";
-  whyNot.innerHTML="";
+  $("usageText").innerText =
+    usageVal < 40 ? "City focused" :
+    usageVal > 60 ? "Highway focused" :
+    "Balanced usage";
 
-  if(Math.abs(v.seat-(legHeight.value||height.value*0.45))<40)
-    whyFit.innerHTML+="<li>Seat height matches your body well</li>";
+  $("freqText").innerText =
+    freqVal < 40 ? "Occasional usage" :
+    freqVal > 70 ? "Daily usage" :
+    "Moderate usage";
+
+  const list = vehicles
+    .filter(v => v.type === type)
+    .sort((a, b) => avg(b) - avg(a));
+
+  list.forEach((v, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      ${i === 0 ? '<div class="best">⭐ Best for you</div>' : ''}
+      <b>${v.name}</b><br>
+      Score: ${avg(v)}/100
+      <button onclick='showDetail(${JSON.stringify(v)})'>Details</button>
+    `;
+    results.appendChild(card);
+  });
+}
+
+/* ===============================
+   DETAIL MODAL
+================================ */
+function showDetail(v) {
+  selected = v;
+  $("detailModal").classList.remove("hidden");
+
+  $("dName").innerText = v.name;
+  $("dScore").innerText = `Overall Score: ${avg(v)}/100`;
+
+  $("barComfort").style.width = v.comfort + "%";
+  $("barControl").style.width = v.control + "%";
+  $("barPosture").style.width = v.posture + "%";
+  $("barUsage").style.width = v.cityBias + "%";
+
+  $("whyFit").innerHTML = "";
+  $("whyNot").innerHTML = "";
+
+  const height = Number($("height").value);
+  const leg = Number($("legHeight")?.value || height * 0.45);
+
+  if (Math.abs(v.seat - leg) < 50)
+    $("whyFit").innerHTML += "<li>Seat height suits your body</li>";
   else
-    whyNot.innerHTML+="<li>Seat height may feel slightly off</li>";
+    $("whyNot").innerHTML += "<li>Seat height may feel uncomfortable</li>";
 
-  if(frequency.value>70) whyFit.innerHTML+="<li>Comfort suitable for daily use</li>";
-  if(usage.value>60 && v.cityBias>70) whyNot.innerHTML+="<li>City-tuned vehicle on highway</li>";
+  $("whyFit").innerHTML += "<li>Overall posture matches your usage</li>";
 }
 
-function closeDetail(){ detailModal.classList.add("hidden"); }
+function closeDetail() {
+  $("detailModal").classList.add("hidden");
+}
 
-function selectCompare(){
-  if(!compare.includes(selected)) compare.push(selected);
+/* ===============================
+   COMPARISON
+================================ */
+function selectCompare() {
+  if (!compare.includes(selected)) compare.push(selected);
   closeDetail();
-  if(compare.length===2) openCompare();
+
+  if (compare.length === 2) openCompare();
 }
 
-function openCompare(){
-  compareContent.innerHTML="";
-  compare.forEach(v=>{
-    compareContent.innerHTML+=`
+function openCompare() {
+  const box = $("compareContent");
+  box.innerHTML = "";
+
+  compare.forEach(v => {
+    box.innerHTML += `
       <div class="compare-card">
         <h3>${v.name}</h3>
         Comfort: ${v.comfort}<br>
@@ -104,12 +142,14 @@ function openCompare(){
         Posture: ${v.posture}<br>
         Usage: ${v.cityBias}<br>
         <b>Total: ${avg(v)}/100</b>
-      </div>`;
+      </div>
+    `;
   });
-  compareModal.classList.remove("hidden");
+
+  $("compareModal").classList.remove("hidden");
 }
 
-function closeCompare(){
-  compareModal.classList.add("hidden");
-  compare=[];
+function closeCompare() {
+  $("compareModal").classList.add("hidden");
+  compare = [];
 }
